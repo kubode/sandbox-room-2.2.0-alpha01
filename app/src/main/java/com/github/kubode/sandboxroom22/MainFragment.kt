@@ -21,6 +21,7 @@ class MainFragment : Fragment() {
         view.findViewById<ViewGroup>(R.id.container).apply {
             addButton<PrePackagedDatabaseFragment>()
             addButton<SchemaDefaultValuesFragment>()
+            addButton<ManyToManyRelationsFragment>()
         }
     }
 
