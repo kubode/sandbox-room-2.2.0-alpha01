@@ -20,6 +20,7 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<ViewGroup>(R.id.container).apply {
             addButton<PrePackagedDatabaseFragment>()
+            addButton<SchemaDefaultValuesFragment>()
         }
     }
 

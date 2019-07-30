@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.room.Dao
 import androidx.room.Database
@@ -33,11 +34,13 @@ interface PrePackagedDao {
 }
 
 class PrePackagedDatabaseFragment : Fragment() {
-    private val db: PrePackagedDatabase by lazy {
+    private val dao: PrePackagedDao by lazy {
+        // createFromAsset cannot use with inMemoryDb
         Room.databaseBuilder(requireContext(), PrePackagedDatabase::class.java, "pre-packaged.db")
             .createFromAsset("pre-packaged.db")
             .allowMainThreadQueries()
             .build()
+            .prePackagedDao()
     }
 
     override fun onCreateView(
@@ -45,9 +48,14 @@ class PrePackagedDatabaseFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return EpoxyRecyclerView(requireContext()).apply {
+        return inflater.inflate(R.layout.fragment_common, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.findViewById<EpoxyRecyclerView>(R.id.epoxy_recycler_view).apply {
             withModels {
-                db.prePackagedDao().loadAllPrePackaged().forEach { prePackaged ->
+                dao.loadAllPrePackaged().forEach { prePackaged ->
                     simpleTextItemView {
                         id(prePackaged.id)
                         number(prePackaged.id)
@@ -55,6 +63,9 @@ class PrePackagedDatabaseFragment : Fragment() {
                     }
                 }
             }
+        }
+        view.findViewById<View>(R.id.add).apply {
+            isVisible = false
         }
     }
 }
