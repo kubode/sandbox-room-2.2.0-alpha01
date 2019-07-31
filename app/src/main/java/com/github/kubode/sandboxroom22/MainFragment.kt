@@ -22,6 +22,7 @@ class MainFragment : Fragment() {
             addButton<PrePackagedDatabaseFragment>()
             addButton<SchemaDefaultValuesFragment>()
             addButton<ManyToManyRelationsFragment>()
+            addButton<OneToOneRelationsFragment>()
             addButton<TargetEntityFragment>()
         }
     }
