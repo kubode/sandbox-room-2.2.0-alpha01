@@ -16,6 +16,8 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverter
+import androidx.room.TypeConverters
 import androidx.room.Update
 import com.airbnb.epoxy.EpoxyRecyclerView
 
@@ -25,8 +27,17 @@ import com.airbnb.epoxy.EpoxyRecyclerView
     ],
     version = 1
 )
+@TypeConverters(CharSeqConv::class)
 abstract class TargetEntityDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
+}
+
+class CharSeqConv {
+    @TypeConverter
+    fun fromString(value: String?): CharSequence? = value
+
+    @TypeConverter
+    fun toString(value: CharSequence?): String? = value?.toString()
 }
 
 @Entity
@@ -43,7 +54,7 @@ data class Project(
 data class ProjectMiniApiEntity(
     var id: Long,
     @ColumnInfo(name = "title") // Map to Entity's column
-    var title2: String
+    var title2: CharSequence // Converted to Entity's column using TypeConverter
 )
 
 @Dao
