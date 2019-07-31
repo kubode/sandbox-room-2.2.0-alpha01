@@ -47,7 +47,9 @@ data class Song(
     @PrimaryKey(autoGenerate = true)
     val songId: Long,
     val title: String
-)
+) {
+    override fun toString() = "$songId: $title"
+}
 
 @Entity(primaryKeys = ["playlistId", "songId"])
 data class PlaylistSongRef(
@@ -114,7 +116,7 @@ class ManyToManyRelationsFragment : Fragment() {
                             text(
                                 """
                                     Title: ${record.playlist.title}
-                                    Songs: ${record.songs.joinToString { it.title }}
+                                    Songs: ${record.songs.joinToString()}
                                 """.trimIndent()
                             )
                         }
