@@ -42,7 +42,8 @@ data class Project(
 // https://issuetracker.google.com/issues/138664463
 data class ProjectMiniApiEntity(
     var id: Long,
-    var title: String
+    @ColumnInfo(name = "title") // Map to Entity's column
+    var title2: String
 )
 
 @Dao
@@ -106,7 +107,7 @@ class TargetEntityFragment : Fragment() {
                     dao.insertNewProject(
                         ProjectMiniApiEntity(
                             id = id,
-                            title = "Title of $id"
+                            title2 = "Title of $id"
                         )
                     )
                 }
