@@ -28,15 +28,12 @@ import com.airbnb.epoxy.EpoxyRecyclerView
     ],
     version = 1
 )
-@TypeConverters(CharSeqConv::class)
+@TypeConverters(CharSequenceConverter::class)
 abstract class TargetEntityDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
 }
 
-class CharSeqConv {
-    @TypeConverter
-    fun fromString(value: String?): CharSequence? = value
-
+class CharSequenceConverter {
     @TypeConverter
     fun toString(value: CharSequence?): String? = value?.toString()
 }
