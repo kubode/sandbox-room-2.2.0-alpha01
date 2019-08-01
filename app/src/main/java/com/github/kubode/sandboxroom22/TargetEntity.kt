@@ -11,6 +11,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.Insert
 import androidx.room.PrimaryKey
 import androidx.room.Query
@@ -54,7 +55,9 @@ data class Project(
 data class ProjectMiniApiEntity(
     var id: Long,
     @ColumnInfo(name = "title") // Map to Entity's column
-    var title2: CharSequence // Converted to Entity's column using TypeConverter
+    var title2: CharSequence, // Converted to Entity's column using TypeConverter
+    @Ignore
+    var list: List<String>
 )
 
 @Dao
@@ -118,7 +121,8 @@ class TargetEntityFragment : Fragment() {
                     dao.insertNewProject(
                         ProjectMiniApiEntity(
                             id = id,
-                            title2 = "Title of $id"
+                            title2 = "Title of $id",
+                            list = emptyList()
                         )
                     )
                 }
