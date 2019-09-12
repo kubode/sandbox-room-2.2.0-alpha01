@@ -7,19 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.observe
-import androidx.room.ColumnInfo
-import androidx.room.Dao
-import androidx.room.Database
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.Insert
-import androidx.room.PrimaryKey
-import androidx.room.Query
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverter
-import androidx.room.TypeConverters
-import androidx.room.Update
+import androidx.room.*
 import com.airbnb.epoxy.EpoxyRecyclerView
 
 @Database(
@@ -28,7 +16,11 @@ import com.airbnb.epoxy.EpoxyRecyclerView
     ],
     version = 1
 )
-@TypeConverters(CharSequenceConverter::class)
+@TypeConverters(
+    CharSequenceConverter::class,
+    AvatarConverter::class,
+    AvatarApiEntityConverter::class
+)
 abstract class TargetEntityDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
 }
@@ -38,23 +30,44 @@ class CharSequenceConverter {
     fun toString(value: CharSequence?): String? = value?.toString()
 }
 
+class AvatarConverter {
+    @TypeConverter
+    fun toString(value: Avatar?): String? = value?.url
+
+    @TypeConverter
+    fun fromString(value: String?): Avatar? = value?.let { Avatar(it) }
+}
+
+class AvatarApiEntityConverter {
+    @TypeConverter
+    fun toDb(value: AvatarApiEntity?): Avatar? = value?.let { Avatar(it.url) }
+}
+
 @Entity
 data class Project(
     @PrimaryKey
     val id: Long,
     val title: String,
     @ColumnInfo(defaultValue = "''")
-    val longDescription: String
+    val longDescription: String,
+    val avatar: Avatar
 )
 
-// Using val will cause "Cannot find setter for field" compile error.
-// https://issuetracker.google.com/issues/138664463
+data class Avatar(
+    val url: String
+)
+
 data class ProjectMiniApiEntity(
-    var id: Long,
+    val id: Long,
     @ColumnInfo(name = "title") // Map to Entity's column
-    var title2: CharSequence, // Converted to Entity's column using TypeConverter
+    val title2: CharSequence, // Converted to Entity's column using TypeConverter
     @Ignore
-    var list: List<String>
+    val list: List<String>,
+    val avatar: AvatarApiEntity
+)
+
+data class AvatarApiEntity(
+    val url: String
 )
 
 @Dao
@@ -119,7 +132,8 @@ class TargetEntityFragment : Fragment() {
                         ProjectMiniApiEntity(
                             id = id,
                             title2 = "Title of $id",
-                            list = emptyList()
+                            list = emptyList(),
+                            avatar = AvatarApiEntity("foo")
                         )
                     )
                 }
