@@ -17,32 +17,18 @@ import com.airbnb.epoxy.EpoxyRecyclerView
     version = 1
 )
 @TypeConverters(
-    CharSequenceConverter::class,
-    AvatarConverter::class,
-    AvatarApiEntityConverter::class
+    CompanyApiEntityConverter::class
 )
 abstract class TargetEntityDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
 }
 
-class CharSequenceConverter {
+class CompanyApiEntityConverter {
     @TypeConverter
-    fun toString(value: CharSequence?): String? = value?.toString()
+    fun toCompanyId(value: CompanyMiniApiEntity?): Long? = value?.id
 }
 
-class AvatarConverter {
-    @TypeConverter
-    fun toString(value: Avatar?): String? = value?.url
-
-    @TypeConverter
-    fun fromString(value: String?): Avatar? = value?.let { Avatar(it) }
-}
-
-class AvatarApiEntityConverter {
-    @TypeConverter
-    fun toDb(value: AvatarApiEntity?): Avatar? = value?.let { Avatar(it.url) }
-}
-
+// DB
 @Entity
 data class Project(
     @PrimaryKey
@@ -50,24 +36,38 @@ data class Project(
     val title: String,
     @ColumnInfo(defaultValue = "''")
     val longDescription: String,
-    val avatar: Avatar
+    @Embedded(prefix = "avatar_")
+    val avatar: Avatar,
+    val companyId: Long? // Foreign Key
 )
 
 data class Avatar(
-    val url: String
+    val url: String,
+    val captionText: String
 )
 
+// API
 data class ProjectMiniApiEntity(
     val id: Long,
     @ColumnInfo(name = "title") // Map to Entity's column
-    val title2: CharSequence, // Converted to Entity's column using TypeConverter
+    val title2: String,
     @Ignore
     val list: List<String>,
-    val avatar: AvatarApiEntity
+    @Embedded(prefix = "avatar_") // Spread all of properties using prefix
+    val avatar: AvatarApiEntity,
+    @ColumnInfo(name = "companyId") // Converted to Entity's column using TypeConverter
+    val company: CompanyMiniApiEntity?
 )
 
 data class AvatarApiEntity(
-    val url: String
+    val url: String,
+    @ColumnInfo(name = "captionText")
+    val caption_text: String
+)
+
+data class CompanyMiniApiEntity(
+    val id: Long,
+    val name: String
 )
 
 @Dao
@@ -113,12 +113,7 @@ class TargetEntityFragment : Fragment() {
                         simpleTextItemView {
                             id(project.id)
                             number(project.id)
-                            text(
-                                """
-                                    Title: ${project.title}
-                                    Long Description: ${project.longDescription}
-                                """.trimIndent()
-                            )
+                            text(project.toString())
                         }
                     }
                 }
@@ -133,7 +128,8 @@ class TargetEntityFragment : Fragment() {
                             id = id,
                             title2 = "Title of $id",
                             list = emptyList(),
-                            avatar = AvatarApiEntity("foo")
+                            avatar = AvatarApiEntity("foo", "test"),
+                            company = CompanyMiniApiEntity(1L, "wantedly")
                         )
                     )
                 }
